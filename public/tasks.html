@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Tâches</title>
+</head>
+<body>
+  <h1>Gestion des Tâches</h1>
+
+  <h3>Ajouter une tâche</h3>
+  <form id="add-task-form">
+    <input type="text" id="task-name" placeholder="Nom de la tâche" required>
+    <input type="text" id="task-description" placeholder="Description de la tâche" required>
+    <select id="task-status">
+      <option value="En cours">En cours</option>
+      <option value="Terminé">Terminé</option>
+      <option value="Annulé">Annulé</option>
+    </select>
+    <button type="submit">Ajouter</button>
+  </form>
+
+  <h3>Liste des tâches</h3>
+  <div id="task-list"></div>
+
+  <h3>Mettre à jour une tâche</h3>
+  <form id="update-task-form">
+    <input type="hidden" id="update-task-id">
+    <input type="text" id="update-task-name" placeholder="Nom de la tâche" required>
+    <select id="update-task-status">
+      <option value="En cours">En cours</option>
+      <option value="Terminé">Terminé</option>
+      <option value="Annulé">Annulé</option>
+    </select>
+    <button type="submit">Mettre à jour</button>
+  </form>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Vous devez être connecté pour gérer vos tâches.');
+      window.location.href = '/login';
+    }
+
+    async function fetchTasks() {
+      const response = await fetch('http://localhost:5000/api/tasks', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const tasks = await response.json();
+      const taskList = document.getElementById('task-list');
+      taskList.innerHTML = '';
+      tasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        taskElement.innerHTML = `
+          <p>${task.title} - ${task.status}</p>
+          <button onclick="showUpdateForm(${task.id}, '${task.title}', '${task.status}')">Modifier</button>
+          <button onclick="deleteTask(${task.id})">Supprimer</button>
+        `;
+        taskList.appendChild(taskElement);
+      });
+    }
+
+    async function addTask(event) {
+      event.preventDefault();
+      const taskName = document.getElementById('task-name').value;
+      const taskDescription = document.getElementById('task-description').value;
+      const taskStatus = document.getElementById('task-status').value;
+
+      const response = await fetch('http://localhost:5000/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: taskName,
+          description: taskDescription,
+          status: taskStatus,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Tâche ajoutée avec succès');
+        fetchTasks();
+      } else {
+        alert('Erreur lors de l\'ajout de la tâche');
+      }
+    }
+
+    async function updateTask(event) {
+      event.preventDefault();
+
+      const taskId = document.getElementById('update-task-id').value;
+      const taskName = document.getElementById('update-task-name').value;
+      const taskStatus = document.getElementById('update-task-status').value;
+
+      const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: taskName,
+          status: taskStatus,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Tâche mise à jour');
+        fetchTasks();
+      } else {
+        alert('Erreur lors de la mise à jour de la tâche');
+      }
+    }
+
+    async function deleteTask(taskId) {
+      const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        alert('Tâche supprimée');
+        fetchTasks();
+      } else {
+        alert('Erreur lors de la suppression de la tâche');
+      }
+    }
+
+    function showUpdateForm(taskId, taskName, taskStatus) {
+      document.getElementById('update-task-id').value = taskId;
+      document.getElementById('update-task-name').value = taskName;
+      document.getElementById('update-task-status').value = taskStatus;
+    }
+
+    document.getElementById('add-task-form').addEventListener('submit', addTask);
+    document.getElementById('update-task-form').addEventListener('submit', updateTask);
+
+    fetchTasks();
+  </script>
+</body>
+</html>
