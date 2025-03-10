@@ -1,16 +1,191 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+
+    margin: 0;
+    color: white;
+}
+.body2 {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: white;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.cardt{
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 1000px;
     text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+.card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 50px;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-top: 20px;
+    font-size: 20px;
 }
 
 form {
-    margin: 20px auto;
-    width: 300px;
     display: flex;
     flex-direction: column;
+    gap: 15px;
+    align-items: center; /* Centrer tous les éléments enfants horizontalement */
+    justify-content: center;
+    text-align: center;
+   
 }
 
-input, select, button {
-    margin: 5px 0;
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus, select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+button {
+    width: 40%;
+    padding: 12px;
+    border: none;
+    border-radius: 30px;
+    background: white;
+    color: #1E3A8A;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    
+}
+
+button:hover {
+    background: #e5e7eb;
+}
+
+.logout-btn {
+    background: #ff4d4d;
+    color: white;
+}
+
+/* Tableau des tâches */
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+table {
+    width: 200%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
     padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+}
+
+th {
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+td {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+td .edit-btn, td .delete-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #fbbc05;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #e09e00;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .card {
+        max-width: 90%;
+    }
+
+    table {
+        font-size: 14px;
+    }
 }

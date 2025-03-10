@@ -4,7 +4,6 @@ import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// Ajouter une tâche
 router.post('/', authenticateJWT, async (req, res) => {
     const { title, description, status } = req.body;
     const userId = req.user.id;
@@ -17,7 +16,6 @@ router.post('/', authenticateJWT, async (req, res) => {
     }
 });
 
-// Récupérer les tâches de l'utilisateur connecté
 router.get('/', authenticateJWT, async (req, res) => {
     try {
         const [tasks] = await db.execute('SELECT * FROM tasks WHERE user_id = ?', [req.user.id]);
@@ -27,7 +25,6 @@ router.get('/', authenticateJWT, async (req, res) => {
     }
 });
 
-// Mettre à jour une tâche
 router.put('/:id', authenticateJWT, async (req, res) => {
     const { id } = req.params;
     const { title, description, status } = req.body;
@@ -42,7 +39,6 @@ router.put('/:id', authenticateJWT, async (req, res) => {
     }
 });
 
-// Supprimer une tâche
 router.delete('/:id', authenticateJWT, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;

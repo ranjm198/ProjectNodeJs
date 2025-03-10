@@ -3,25 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des tâches</title>
+    <title>Manager Tasks</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+  header {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    padding: 10px 0;
+    text-align: left;
+}
+
+.nav-links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    margin-left: 50px;
+
+}
+
+.nav-links li {
+    display: inline-block;
+    text-align: left;
+    
+}
+
+.nav-links li a {
+    color: #274cb3;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: inline-block;
+    transition: background-color 0.3s;
+    text-align: left;
+    font-weight: bold;
+}
+
+.nav-links li a:hover {
+    background-color: #e7e7e7;
+        text-align: left;
+}
+
+    </style>
 </head>
 <body>
-    <h2>Gestion des tâches</h2>
-    <button onclick="logout()">Se déconnecter</button>
-
-    <form id="taskForm">
-        <input type="text" id="taskTitle" placeholder="Titre de la tâche" required>
-        <input type="text" id="taskDescription" placeholder="Description" required>
-        <select id="taskStatus">
-            <option value="pending">En attente</option>
-            <option value="completed">Terminée</option>
-        </select>
-        <button type="submit">Ajouter</button>
-    </form>
-
-    <h3>Mes Tâches</h3>
-    <ul id="taskList"></ul>
+    
+    <header>
+        <div >
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="tasks.html">Manager Tasks</a></li>
+                    <li><a href="profil.html">Manager Users</a></li>
+                    <li><a href="#" onclick="logout()"> Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <br>
+    <div class="container">
+        <div class="cardt">
+            <!-- <button class="logout-btn" onclick="logout()">Log out</button>--> 
+            <h2>Task Management 👋</h2>
+            <form id="taskForm">
+                <br>
+                <input type="text" id="taskTitle" placeholder="Task Title" required>
+                <input type="text" id="taskDescription" placeholder="Description" required>
+                <select id="taskStatus">
+                    <option value="pending">Pending ⏳</option>
+                    <option value="completed">Completed ✅</option>
+                </select>
+                <button type="submit" class="logout-btn">Add</button>
+            </form>
+    
+            <h3>📋 Task List</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskList">
+                        <!-- The tasks will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <br>
 
     <script src="script.js"></script>
 </body>

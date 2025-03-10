@@ -5,7 +5,6 @@ import { db } from '../models/db.js';
 
 const router = express.Router();
 
-// Inscription
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -18,7 +17,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Connexion
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -36,5 +34,25 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Erreur serveur', error });
     }
 });
+router.get('/list', async (req, res) => {
+    try {
+        const [users] = await db.execute('SELECT id, username, password FROM users');
+        res.json(users);  
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur', error });
+    }
+});
+router.delete('/delete/:id', async (req, res) => {
+    const { id } = req.params; // On récupère l'ID de l'utilisateur à supprimer
 
+    try {
+        const [result] = await db.execute('DELETE FROM users WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+        res.json({ message: 'Utilisateur supprimé avec succès' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur', error });
+    }
+});
 export default router;
