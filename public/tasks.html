@@ -6,48 +6,61 @@
     <title>Welcome 👋</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-  header {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #ffffff, #ffffff);
-    padding: 10px 0;
-    text-align: left;
-}
+        header {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+            padding: 10px 0;
+            text-align: left;
+        }
 
-.nav-links {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    margin-left: 50px;
+        .nav-links {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            margin-left: 50px;
+        }
 
-}
+        .nav-links li {
+            display: inline-block;
+            text-align: left;
+        }
 
-.nav-links li {
-    display: inline-block;
-    text-align: left;
-    
-}
+        .nav-links li a {
+            color: #274cb3;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+            transition: background-color 0.3s;
+            text-align: left;
+            font-weight: bold;
+        }
 
-.nav-links li a {
-    color: #274cb3;
-    text-decoration: none;
-    padding: 10px 15px;
-    display: inline-block;
-    transition: background-color 0.3s;
-    text-align: left;
-    font-weight: bold;
-}
+        .nav-links li a:hover {
+            background-color: #e7e7e7;
+            text-align: left;
+        }
 
-.nav-links li a:hover {
-    background-color: #e7e7e7;
-        text-align: left;
-}
+      
 
+      
+
+        /* Styles for the notification */
+        .notification {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
-    
     <header>
-        <div >
+        <div>
             <nav>
                 <ul class="nav-links">
                     <li><a href="#">Home</a></li>
@@ -57,14 +70,19 @@
                 </ul>
             </nav>
         </div>
+          <div id="notification" class="notification">
+        Task added successfully! 🎉
+    </div>
+
     </header>
+
     <br>
+
     <div class="container">
         <div class="cardt">
-            <!-- <button class="logout-btn" onclick="logout()">Log out</button>--> 
             <h2>Task Management 👋</h2>
+            <br>
             <form id="taskForm">
-                <br>
                 <input type="text" id="taskTitle" placeholder="Task Title" required>
                 <input type="text" id="taskDescription" placeholder="Description" required>
                 <select id="taskStatus">
@@ -73,7 +91,7 @@
                 </select>
                 <button type="submit" class="logout-btn">Add</button>
             </form>
-    
+
             <h3>📋 Task List</h3>
             <div class="table-container">
                 <table>
@@ -86,15 +104,97 @@
                         </tr>
                     </thead>
                     <tbody id="taskList">
-                        <!-- The tasks will be displayed here -->
+                        <!-- Tasks will be dynamically added here -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    
+
     <br>
 
-    <script src="script.js"></script>
+    <!-- Notification Div -->
+  
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:3000'); // Connexion WebSocket
+    const API_URL = 'http://localhost:3000';
+
+    // Fonction pour afficher les notifications
+    function showNotification(message) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
+    // Charger les tâches au démarrage
+    async function fetchTasks() {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${API_URL}/tasks`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const tasks = await res.json();
+
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = tasks.map(task => `
+                <tr>
+                    <td>${task.title}</td>
+                    <td>${task.description}</td>
+                    <td>${task.status === "pending" ? "⏳ En attente" : "✅ Terminée"}</td>
+                    <td>
+                        <button onclick="updateTask(${task.id})">Modifier</button>
+                        <button onclick="deleteTask(${task.id})">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            alert('Erreur lors du chargement des tâches');
+        }
+    }
+
+    // Ajouter une tâche via formulaire
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('taskTitle').value;
+        const description = document.getElementById('taskDescription').value;
+        const status = document.getElementById('taskStatus').value;
+
+        const task = { title, description, status };
+        socket.emit('addTask', task); // Envoi à WebSocket
+
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDescription').value = '';
+        document.getElementById('taskStatus').value = 'pending';
+    });
+
+    // WebSocket: Écoute l'événement taskAdded et ajoute la tâche instantanément
+    socket.on('taskAdded', (task) => {
+        const taskList = document.getElementById('taskList');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${task.title}</td>
+            <td>${task.description}</td>
+            <td>${task.status}</td>
+            <td>
+                <button onclick="updateTask(${task.id})">Modifier</button>
+                <button onclick="deleteTask(${task.id})">Supprimer</button>
+            </td>
+        `;
+        taskList.appendChild(row);
+
+        showNotification(' Task added successfully! 🎉');
+    });
+
+    fetchTasks();
+    
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';}
+</script>
+
 </body>
 </html>
