@@ -131,31 +131,7 @@
     }
 
     // Charger les tâches au démarrage
-    async function fetchTasks() {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_URL}/tasks`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-            const tasks = await res.json();
-
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = tasks.map(task => `
-                <tr>
-                    <td>${task.title}</td>
-                    <td>${task.description}</td>
-                    <td>${task.status === "pending" ? "⏳ En attente" : "✅ Terminée"}</td>
-                    <td>
-                        <button onclick="updateTask(${task.id})">Modifier</button>
-                        <button onclick="deleteTask(${task.id})">Supprimer</button>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (error) {
-            alert('Erreur lors du chargement des tâches');
-        }
-    }
-
+       
     // Ajouter une tâche via formulaire
     document.getElementById('taskForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -189,7 +165,119 @@
         showNotification(' Task added successfully! 🎉');
     });
 
-    fetchTasks();
+// Écouter les événements 'taskUpdated' et 'taskDeleted' pour mettre à jour l'UI
+socket.on('taskUpdated', (task) => {
+    const taskList = document.getElementById('taskList');
+    const rows = taskList.getElementsByTagName('tr');
+    
+    for (let row of rows) {
+        const taskId = row.getAttribute('data-id');
+        
+        if (taskId == task.id) {
+            row.querySelector('td:nth-child(1)').textContent = task.title;
+            row.querySelector('td:nth-child(2)').textContent = task.description;
+            row.querySelector('td:nth-child(3)').textContent = task.status === 'pending' ? '⏳ Pending' : '✅ Completed';
+        }
+    }
+});
+
+// Écouter l'événement 'taskDeleted' pour supprimer la ligne de la tâche supprimée
+socket.on('taskDeleted', (task) => {
+    const taskList = document.getElementById('taskList');
+    const rows = taskList.getElementsByTagName('tr');
+    
+    for (let row of rows) {
+        const taskId = row.getAttribute('data-id');
+        
+        if (taskId == task.id) {
+            row.remove();
+        }
+    }
+});
+
+// Fonction pour modifier une tâche
+async function updateTask(id) {
+    const title = prompt("Entrez le nouveau titre de la tâche");
+    const description = prompt("Entrez la nouvelle description");
+    const status = prompt("Entrez le nouveau statut de la tâche (pending/completed)");
+
+    const updatedTask = { title, description, status };
+
+    try {
+        const res = await fetch(`http://localhost:3000/tasks/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(updatedTask)
+        });
+        
+        const data = await res.json();
+
+        if (res.ok) {
+            alert(data.message);
+        } else {
+            alert('Erreur lors de la mise à jour de la tâche');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de la mise à jour de la tâche');
+    }
+}
+
+// Fonction pour supprimer une tâche
+async function deleteTask(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+        try {
+            const res = await fetch(`http://localhost:3000/tasks/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+            } else {
+                alert('Erreur lors de la suppression de la tâche');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la suppression de la tâche');
+        }
+    }
+}
+
+// Fonction pour charger les tâches (au démarrage)
+async function fetchTasks() {
+    const token = localStorage.getItem('token');
+    try {
+        const res = await fetch(`http://localhost:3000/tasks`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const tasks = await res.json();
+        const taskList = document.getElementById('taskList');
+
+        taskList.innerHTML = tasks.map(task => `
+            <tr data-id="${task.id}">
+                <td>${task.title}</td>
+                <td>${task.description}</td>
+                <td>${task.status === 'pending' ? '⏳ Pending' : '✅ Completed'}</td>
+                <td>
+                    <button onclick="updateTask(${task.id})">Modifier</button>
+                    <button onclick="deleteTask(${task.id})">Supprimer</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Erreur lors du chargement des tâches:', error);
+        alert('Erreur lors du chargement des tâches');
+    }
+}
+
+fetchTasks();
     
 function logout() {
     localStorage.removeItem('token');

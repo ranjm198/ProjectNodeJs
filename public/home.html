@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'Accueil</title>
+</head>
+<body>
+    <h1>Bienvenue sur la page d'accueil</h1>
+    <p id="userCount">Chargement du nombre d'utilisateurs...</p>
+    <p id="taskCount">Chargement du nombre de tâches...</p>
+
+    <script >
+async function fetchStatistics() {
+    try {
+        const response = await fetch('/home', {  // Assurez-vous que l'URL est correcte
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Afficher les résultats sur la page
+            document.getElementById('userCount').textContent = `Nombre d'utilisateurs: ${data.userCount}`;
+            document.getElementById('taskCount').textContent = `Nombre de tâches: ${data.taskCount}`;
+        } else {
+            console.error('Erreur lors de la récupération des statistiques:', data.message);
+        }
+    } catch (error) {
+        console.error('Erreur réseau ou serveur:', error);
+    }
+}
+
+// Appeler la fonction pour récupérer les statistiques dès que la page est prête
+window.onload = fetchStatistics;
+
+    </script>  <!-- Assurez-vous d'inclure le fichier JS -->
+</body>
+</html>

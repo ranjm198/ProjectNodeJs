@@ -52,6 +52,8 @@ router.delete('/:id', authenticateJWT, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    console.log(`Suppression de la tâche avec ID : ${id}, Utilisateur : ${userId}`); // Ajoutez un log pour vérifier l'ID
+
     try {
         const [result] = await db.execute('DELETE FROM tasks WHERE id = ? AND user_id = ?', [id, userId]);
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Tâche non trouvée' });
@@ -60,9 +62,11 @@ router.delete('/:id', authenticateJWT, async (req, res) => {
 
         res.status(200).json({ message: 'Tâche supprimée avec succès' });
     } catch (error) {
+        console.error('Erreur lors de la suppression de la tâche:', error); // Log de l'erreur
         res.status(500).json({ message: 'Erreur serveur', error });
     }
 });
+
 
 export const initSocket = (httpServer) => {
     io.attach(httpServer); 

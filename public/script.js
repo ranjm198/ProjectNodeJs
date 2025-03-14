@@ -160,3 +160,45 @@ function logout() {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
 }
+// Function to load the user list
+function loadUsers() {
+    fetch('/users/list')
+        .then(response => response.json())
+        .then(users => {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = ''; // Clear the table first
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.password}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
+                    </td>
+                `;
+                userList.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+// Function to delete a user
+function deleteUser(userId) {
+    const confirmation = confirm('Are you sure you want to delete this user?');
+    if (!confirmation) return;
+
+    fetch(`/users/delete/${userId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === 'User successfully deleted') {
+                alert('User deleted');
+                loadUsers(); // Reload the user list after deletion
+            } else {
+                alert(data.message || 'An error occurred while deleting.');
+            }
+        })
+        .catch(error => console.error('Error deleting user:', error));
+}
+window.onload = loadUsers;
